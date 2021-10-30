@@ -1,0 +1,27 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'CollegiateSheetsAutoFill'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation 'com.google.api-client:google-api-client:1.30.4'
+    implementation 'com.google.oauth-client:google-oauth-client-jetty:1.30.6'
+    implementation 'com.google.apis:google-api-services-sheets:v4-rev581-1.25.0'
+    implementation 'org.json:json:20210307'
+    implementation 'org.jsoup:jsoup:1.14.3'
+    implementation 'net.sourceforge.htmlunit:htmlunit:2.53.0'
+}
+
+test {
+    useJUnitPlatform()
+}
