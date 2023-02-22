@@ -13,14 +13,15 @@ public class CollegiateSheetsAutoFill {
     public static void main(String... args) throws IOException, GeneralSecurityException {
         //Basic variables for knowing where to look in and update the sheet
         int START_ROW = 2;
-        int END_ROW = 590;
-        String START_COLUMN = "P";
-        String END_COLUMN = "AA";
+        int END_ROW = 6;
+        String START_COLUMN = "N";
+        String END_COLUMN = "W";
         String HYPERLINK_COLUMN = "B";
         boolean DO_NOT_INCLUDE_BLANKS_IN_SR = false;
-        boolean DO_NOT_INCLUDE_BLANKS_IN_BATTLETAGS = false;
+        boolean DO_NOT_INCLUDE_BLANKS_IN_BATTLETAGS = true;
+        int MAX_NUMBER_OF_PLAYERS_PER_TEAM = 10;
         boolean updateBattleTags = true;
-        String sheetName = "'Fall 2022'!";
+        String sheetName = "'Spring 2023'!";
         int sheetNumber = 0;
         String sheetID = "1CwH9-N_yVECQl-UHVK5_PkHE-YeBSyS-ZA0gNfU2IZI";
         //String sheetID = "15iOQlqmXKlgStMEqINIXRAtjI4rXcroVJDdMlFwj4Pw";
@@ -54,11 +55,11 @@ public class CollegiateSheetsAutoFill {
                 String gameBattleLink = currentCellData.getHyperlink();
                 System.out.println(gameBattleLink);
                 if (gameBattleLink == null) {
-                    System.out.println("No Hyperlink was found in " + sheetName + HYPERLINK_COLUMN + String.valueOf(currRow) + ". Skipping Row");
+                    System.out.println("No Hyperlink was found in " + sheetName + HYPERLINK_COLUMN + String.valueOf(currRow) + ", skipping row");
                 } else {
                     List<Object> listOfBTags = getBattleTagsUtil.getBTagsFromGameBattles(gameBattleLink);
                     if (!DO_NOT_INCLUDE_BLANKS_IN_BATTLETAGS) {
-                        for (int x = listOfBTags.size(); x <= 11; x++) {
+                        for (int x = listOfBTags.size(); x < MAX_NUMBER_OF_PLAYERS_PER_TEAM; x++) {
                             listOfBTags.add("");
                         }
                     }
