@@ -39,7 +39,7 @@ public class GetBattleTagsUtil {
         }
         HtmlPage gameBattlesPage = getHtlmPage(gameBattlesURL);
         webClient.waitForBackgroundJavaScript(5000);
-        List<HtmlSpan> bTagsHtmlSpan = gameBattlesPage.getByXPath("//span[@_ngcontent-serverapp-c416='']");
+        List<HtmlSpan> bTagsHtmlSpan = gameBattlesPage.getByXPath("//span[@_ngcontent-serverapp-c419='']");
         List<Object> bTags = new ArrayList<>();
         for (HtmlSpan htmlSpan: bTagsHtmlSpan) {
             bTags.add(htmlSpan.asNormalizedText());
