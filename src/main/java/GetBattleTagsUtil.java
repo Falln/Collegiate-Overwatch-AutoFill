@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -21,7 +20,7 @@ public class GetBattleTagsUtil {
     WebClient webClient;
 
     public GetBattleTagsUtil() {
-        webClient = gethtmlUnitClient();
+        webClient = getHtmlUnitClient();
         WebWindow currentWebWindow = webClient.getCurrentWindow();
         currentWebWindow.setOuterWidth(100);
         currentWebWindow.setOuterHeight(100);
@@ -40,9 +39,9 @@ public class GetBattleTagsUtil {
         }
         HtmlPage gameBattlesPage = getHtlmPage(gameBattlesURL);
         webClient.waitForBackgroundJavaScript(5000);
-        List<HtmlSpan> bTagsHtlmSpan = gameBattlesPage.getByXPath("//span[@_ngcontent-serverapp-c393='']");
+        List<HtmlSpan> bTagsHtmlSpan = gameBattlesPage.getByXPath("//span[@_ngcontent-serverapp-c416='']");
         List<Object> bTags = new ArrayList<>();
-        for (HtmlSpan htmlSpan:bTagsHtlmSpan) {
+        for (HtmlSpan htmlSpan: bTagsHtmlSpan) {
             bTags.add(htmlSpan.asNormalizedText());
         }
         return bTags;
@@ -61,7 +60,7 @@ public class GetBattleTagsUtil {
         return resultPage;
     }
 
-    static public WebClient gethtmlUnitClient() {
+    static public WebClient getHtmlUnitClient() {
         WebClient webClient;
         LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log",
                 "org.apache.commons.logging.impl.NoOpLog");

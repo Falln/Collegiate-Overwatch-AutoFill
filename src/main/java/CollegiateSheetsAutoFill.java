@@ -2,6 +2,7 @@
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -11,17 +12,18 @@ public class CollegiateSheetsAutoFill {
 
     public static void main(String... args) throws IOException, GeneralSecurityException {
         //Basic variables for knowing where to look in and update the sheet
-        int START_ROW = 3;
-        int END_ROW = 573;
-        String START_COLUMN = "S";
-        String END_COLUMN = "AD";
-        String HYPERLINK_COLUMN = "C";
+        int START_ROW = 2;
+        int END_ROW = 590;
+        String START_COLUMN = "P";
+        String END_COLUMN = "AA";
+        String HYPERLINK_COLUMN = "B";
         boolean DO_NOT_INCLUDE_BLANKS_IN_SR = false;
         boolean DO_NOT_INCLUDE_BLANKS_IN_BATTLETAGS = false;
-        boolean updateBattleTags = false;
-        String sheetName = "'Fall 2021 (Current)'!";
+        boolean updateBattleTags = true;
+        String sheetName = "'Fall 2022'!";
         int sheetNumber = 0;
         String sheetID = "1CwH9-N_yVECQl-UHVK5_PkHE-YeBSyS-ZA0gNfU2IZI";
+        //String sheetID = "15iOQlqmXKlgStMEqINIXRAtjI4rXcroVJDdMlFwj4Pw";
 
         //APIs, objects, and calculated variables needed for later
         Sheets sheetsService = SheetsServiceUtil.getSheetsService();
@@ -105,11 +107,11 @@ public class CollegiateSheetsAutoFill {
             //and ends when it reaches either the end of the array or END_COLUMN
             for (int column = 0; column < currRowBTags.size() && !currColumn.equals(END_COLUMN); column++) {
                 String bTag = (String) currRowBTags.get(column); //Grab bTag String
-                System.out.print("Getting data for bTag " + bTag);
+                System.out.println("Getting data for bTag " + bTag);
                 String highestSR;
                 //Check if the value from the sheets has data/bTag
                 if (!bTag.equals("")) {
-                    highestSR = autoFillAPI.getHighestHistoricalSR(bTag); //If it does, get rank
+                    highestSR = autoFillAPI.getHighestOverbuffSR(bTag); //If it does, get rank
                 } else {
                     highestSR = ""; //If not add a blank
                 }
@@ -144,7 +146,7 @@ public class CollegiateSheetsAutoFill {
                 +"in the resources folder");
         FileWriter writer = null;
         try {
-            writer = new FileWriter("C:\\Users\\isaac\\Documents\\Program Projects\\Personal Projects\\CollegiateOW_AutoFill\\src\\main\\resources\\Unknown BattleTags.txt");
+            writer = new FileWriter(new File("src\\main\\resources\\Unknown BattleTags.txt").getAbsolutePath());
             for (String bTagInfo:unknownBTags) {
                 writer.write("\n" + bTagInfo);
             }
@@ -158,7 +160,6 @@ public class CollegiateSheetsAutoFill {
      * Since sheets goes from Z to AA, this iterates a String using Sheets column format
      * MAX currently is AZ, but can be expanded further.
      */
-
     public static String iterateColumn(String currColumn){
         if (currColumn.equals("Z")) {
             return "AA";

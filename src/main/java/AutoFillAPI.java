@@ -1,4 +1,3 @@
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -13,18 +12,25 @@ import java.util.stream.Collectors;
 
 public class AutoFillAPI {
 
-    public AutoFillAPI() {
-    }
+    //No need for a constructor
+    public AutoFillAPI() {}
 
+    /**
+     * Takes a battletag and gets the all the player data about that player in JSON format 
+     * using the Overfast API: https://github.com/TeKrop/overfast-api
+     * @param battleTag battletag of the player to look for
+     * @return JSONObject containing all the usual profile data on a player
+     */
     public JSONObject getProfileData(String battleTag) {
         //Change all #'s in bTags to -'s
         //String battleTagBracketFilter = battleTag.substring(1,battleTag.length()-1);
         String battleTagNoHash = battleTag.replace('#','-');
+
         //Find the appropriate URL to access the ow-api
-        String owAPIURL = "https://ow-api.com/v1/stats/pc/us/".concat(battleTagNoHash).concat("/profile");
-        System.out.println(" " + owAPIURL);
+        String owAPIURL = "https://overfast-api.tekrop.fr/players/".concat(battleTagNoHash).concat("/summary");
+        System.out.println(" " + owAPIURL); //TODO Centralize print statements
         JSONObject profileData = new JSONObject();
-        int response;
+
         //Get the JSON object from the URL (uses the before URL and joins the data sent into a JSONObject
         try(BufferedReader br=new BufferedReader(new InputStreamReader(new URL(owAPIURL).openStream()))) {
             profileData = new JSONObject(br.lines().collect(Collectors.joining()));
@@ -37,6 +43,7 @@ public class AutoFillAPI {
             unknownBTagJSON.put("UnknownTag", "Unknown BattleTag");
             return unknownBTagJSON;
         }
+        
         //Specific catch for if a � character appears in a BattleTag
         try {
             if (profileData.getString("error").equals("Failed to decode platform API response: invalid character '<' looking for beginning of value")) {
@@ -70,19 +77,25 @@ public class AutoFillAPI {
                 int supSR;
                 //Now for each role, we check if its array is there. If not, then we default
                 //to zero. But if one defaults to zero, the naming scheme doesn't matter anymore
-                JSONArray roleSRs = profileData.getJSONArray("ratings");
+                JSONObject roleSRs = profileData.getJSONObject("competitive").getJSONObject("pc");
                 try {
-                    tankSR = (int) roleSRs.getJSONObject(0).get("level");
+                    String tankSRDivision = roleSRs.getJSONObject("tank").getString("division");
+                    int tankSRInt = roleSRs.getJSONObject("tank").getInt("tier");
+                    tankSR = parseOW1RankFromOW2Division(tankSRDivision, tankSRInt);
                 } catch (JSONException e) {
                     tankSR = 0;
                 }
                 try {
-                    dpsSR = (int) roleSRs.getJSONObject(1).get("level");
+                    String dpsSRDivision = roleSRs.getJSONObject("damage").getString("division");
+                    int dpsSRInt = roleSRs.getJSONObject("damage").getInt("tier");
+                    dpsSR = parseOW1RankFromOW2Division(dpsSRDivision, dpsSRInt);
                 } catch (JSONException e) {
                     dpsSR = 0;
                 }
                 try {
-                    supSR = (int) roleSRs.getJSONObject(2).get("level");
+                    String supSRDivision = roleSRs.getJSONObject("support").getString("division");
+                    int supSRInt = roleSRs.getJSONObject("support").getInt("tier");
+                    supSR = parseOW1RankFromOW2Division(supSRDivision, supSRInt);
                 } catch (JSONException e)  {
                     supSR = 0;
                 }
@@ -99,7 +112,120 @@ public class AutoFillAPI {
             } catch (JSONException e) {
                 return "";
             }
+        }
+    }
 
+    /**
+     * Takes the OW2 Divisions and Tiers and converts them to the OW1 scale of 1000-4400
+     */
+    public int parseOW1RankFromOW2Division(String division, int tier) {
+        if (division.equalsIgnoreCase("bronze")) {
+            switch(tier) {
+                case 5:
+                    return 1000;
+                case 4:
+                    return 1100;
+                case 3:
+                    return 1200;
+                case 2:
+                    return 1300;
+                case 1:
+                    return 1400;
+                default:
+                    return 0;
+            }
+        } else if (division.equalsIgnoreCase("silver")) {
+            switch(tier) {
+                case 5:
+                    return 1500;
+                case 4:
+                    return 1600;
+                case 3:
+                    return 1700;
+                case 2:
+                    return 1800;
+                case 1:
+                    return 1900;
+                default:
+                    return 0;
+            }
+        } else if (division.equalsIgnoreCase("gold")) {
+            switch(tier) {
+                case 5:
+                    return 2000;
+                case 4:
+                    return 2100;
+                case 3:
+                    return 2200;
+                case 2:
+                    return 2300;
+                case 1:
+                    return 2400;
+                default:
+                    return 0;
+            }
+        } else if (division.equalsIgnoreCase("platinum")) {
+            switch(tier) {
+                case 5:
+                    return 2500;
+                case 4:
+                    return 2600;
+                case 3:
+                    return 2700;
+                case 2:
+                    return 2800;
+                case 1:
+                    return 2900;
+                default:
+                    return 0;
+            }
+        } else if (division.equalsIgnoreCase("diamond")) {
+            switch(tier) {
+                case 5:
+                    return 3000;
+                case 4:
+                    return 3100;
+                case 3:
+                    return 3200;
+                case 2:
+                    return 3300;
+                case 1:
+                    return 3400;
+                default:
+                    return 0;
+            }
+        } else if (division.equalsIgnoreCase("master")) {
+            switch(tier) {
+                case 5:
+                    return 3500;
+                case 4:
+                    return 3600;
+                case 3:
+                    return 3700;
+                case 2:
+                    return 3800;
+                case 1:
+                    return 3900;
+                default:
+                    return 0;
+            }
+        } else if (division.equalsIgnoreCase("grandmaster")) {
+            switch(tier) {
+                case 5:
+                    return 4000;
+                case 4:
+                    return 4100;
+                case 3:
+                    return 4200;
+                case 2:
+                    return 4300;
+                case 1:
+                    return 4400;
+                default:
+                    return 0;
+            }
+        } else {
+            return 0;
         }
     }
 
@@ -110,11 +236,12 @@ public class AutoFillAPI {
         return getHighestPlayoverwatchSR(profileData);
     }
 
-    private boolean isPrivateProfile(JSONObject profileData) {
-        return profileData.getBoolean("private");
+    public boolean isPrivateProfile(JSONObject profileData) {
+        return profileData.getString("privacy").equals("private") ? true : false;
     }
 
     public String getHighestOverbuffSR(String battleTag) {
+        //Get the HTML file from overbuff
         String battleTagNoHash = battleTag.replace('#', '-');
         Document overbuffHTML;
         try {
@@ -123,30 +250,38 @@ public class AutoFillAPI {
             System.out.println("Invalid Overbuff URL: Bad BattleTag or invalid character");
             return "Unknown BattleTag";
         }
-        String dpsSR = overbuffHTML.select("body > div > div.container.main > div.row.layout-content > div > div.row.with-sidebar > div.columns.four > div:nth-child(2) > div > section > article > table > tbody > tr:nth-child(1) > td:nth-child(3)").text().replace(",", "");
-        String supSR = overbuffHTML.select("body > div > div.container.main > div.row.layout-content > div > div.row.with-sidebar > div.columns.four > div:nth-child(2) > div > section > article > table > tbody > tr:nth-child(2) > td:nth-child(3)").text().replace(",", "");
-        String tankSR = overbuffHTML.select("body > div > div.container.main > div.row.layout-content > div > div.row.with-sidebar > div.columns.four > div:nth-child(2) > div > section > article > table > tbody > tr:nth-child(2) > td:nth-child(3)").text().replace(",", "");
-        String overallSR = overbuffHTML.select("body > div.skin-container.seemsgood > div.container.main > div.row.layout-content > div > div.layout-header > div:nth-child(1) > div:nth-child(2) > div.layout-header-secondary.layout-header-secondary-player > dl:nth-child(1) > dd > span > span").text();
-        int dpsSRInt = convertToInt(dpsSR);
-        int supSRInt = convertToInt(supSR);
-        int tankSRInt = convertToInt(tankSR);
 
-        if (dpsSR.equals("") && supSR.equals("") && tankSR.equals("")) {
-            if (overallSR.length() > 0) {
-                if (overallSR.length() == 3) {
-                    return overallSR.substring(0,3);
-                }
-                return overallSR.substring(0,4);
-            }
-            return overallSR;
+        //Parse the rank icon names (Overbuff currently has it as the "alt" attribute of the rank images)
+        String dpsRank = overbuffHTML.select("div.justify-start:nth-child(2) > div:nth-child(2) > img:nth-child(1)").attr("alt");
+        String supRank = overbuffHTML.select("div.gap-1:nth-child(3) > div:nth-child(2) > img:nth-child(1)").attr("alt");
+        String tankRank = overbuffHTML.select("div.flex-row:nth-child(2) > div:nth-child(1) > div:nth-child(2) > img:nth-child(1)").attr("alt");
+
+        //Parse the tier and division from the rank
+        int dpsTier = convertToInt((dpsRank.length() > 0) ? dpsRank.substring(dpsRank.length()-1) : "0");
+        int supTier = convertToInt((supRank.length() > 0) ? supRank.substring(supRank.length()-1) : "0");
+        int tankTier = convertToInt((tankRank.length() > 0) ? tankRank.substring(tankRank.length()-1) : "0");
+
+        String dpsDivision = dpsRank.substring(0, (dpsRank.length() > 0) ? dpsRank.length()-2 : 0);
+        String supDivision = supRank.substring(0, (supRank.length() > 0) ? supRank.length()-2 : 0);
+        String tankDivision = tankRank.substring(0, (tankRank.length() > 0) ? tankRank.length()-2 : 0);
+
+        //Parse OW1 rank from the OW2 rank
+        int dpsSRInt = parseOW1RankFromOW2Division(dpsDivision, dpsTier);
+        int supSRInt = parseOW1RankFromOW2Division(supDivision, supTier);
+        int tankSRInt = parseOW1RankFromOW2Division(tankDivision, tankTier);
+
+        //Check if no ranks were found/if they are private profiled (or if they all errored?)
+        if(dpsSRInt == 0 && supSRInt == 0 && tankSRInt == 0) {
+            return ""; //"" is the default for private profile
         }
 
+        //Check all the SRs and return the highest SR. If they happen the same it will go Tank > DPS > Sup
         if (tankSRInt >= dpsSRInt && tankSRInt >= supSRInt) {
-            return tankSR;
+            return Integer.toString(tankSRInt);
         } else if (dpsSRInt > tankSRInt && dpsSRInt >= supSRInt) {
-            return dpsSR;
+            return Integer.toString(dpsSRInt);
         } else {
-            return supSR;
+            return Integer.toString(supSRInt);
         }
     }
 
